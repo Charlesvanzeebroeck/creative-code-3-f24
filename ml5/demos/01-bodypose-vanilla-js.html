@@ -1,35 +1,39 @@
 <!DOCTYPE html>
 <html lang="en" class="loading">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BodyPose</title>
+  <title>Test</title>
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
   <style>
     .hidden {
       display: none;
     }
+
     .loading .display-loading {
       display: block;
     }
+
     .running .display-running {
       display: block;
     }
   </style>
 </head>
+
 <body>
   <h1 class="h1">BodyPose</h1>
   <h2 id="state"></h2>
   <canvas id="canvas" class="fancy-shadow hidden display-running"></canvas>
   <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
   <script>
-    
+
     const $canvas = document.querySelector('#canvas');
     const $state = document.querySelector('#state');
     let video, ctx;
     let poses = [];
-    
+
     const STATE_LOADING = "loading";
     const STATE_RUNNING = "running";
     const ALL_STATES = [STATE_LOADING, STATE_RUNNING];
@@ -57,10 +61,12 @@
       console.log('setup');
       ctx = $canvas.getContext('2d');
       // create a video stream - specify a fixed size
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {
-        width: 640,
-        height: 480
-      } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 640,
+          height: 480
+        }
+      });
       video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -96,4 +102,5 @@
     preload();
   </script>
 </body>
+
 </html>
