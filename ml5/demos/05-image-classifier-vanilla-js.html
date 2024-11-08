@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="loading">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,15 @@
     .hidden {
       display: none;
     }
+
     .loading .display-loading {
       display: block;
     }
+
     .running .display-running {
       display: block;
     }
+
     #results {
       background-color: white;
       width: 20rem;
@@ -26,11 +30,13 @@
       font-weight: bold;
       font-size: 2rem;
     }
+
     .running #results {
       display: flex;
     }
   </style>
 </head>
+
 <body>
   <h1 class="h1">Image Classifier</h1>
   <h2 id="state"></h2>
@@ -73,10 +79,12 @@
       console.log('setup');
       ctx = $canvas.getContext('2d');
       // create a video stream - specify a fixed size
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {
-        width: 640,
-        height: 480
-      } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 640,
+          height: 480
+        }
+      });
       video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -106,4 +114,5 @@
     preload();
   </script>
 </body>
+
 </html>

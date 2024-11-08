@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" class="loading">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Body Segmentation</title>
+  <title>Body Segmentation with Flashlight Detection</title>
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
   <style>
     .hidden {
       display: none;
     }
+
     .loading .display-loading {
       display: block;
     }
+
     .running .display-running {
       display: block;
     }
   </style>
 </head>
+
 <body>
-  <h1 class="h1">Body Segmentation</h1>
+  <h1 class="h1">Body Segmentation with Flashlight Detection</h1>
   <h2 id="state"></h2>
   <canvas id="canvas" class="fancy-shadow hidden display-running"></canvas>
   <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
@@ -31,6 +35,8 @@
     let maskCanvas, maskCtx;
     let bodySegmentation;
     let segmentation;
+    let classifier;
+    let flashlightDetected = false; // To track flashlight detection
 
     const STATE_LOADING = "loading";
     const STATE_RUNNING = "running";
@@ -48,12 +54,16 @@
     const preload = async () => {
       setState(STATE_LOADING);
       requestAnimationFrame(draw);
-      // bodySegmentation = ml5.bodySegmentation("BodyPix", { maskType: "parts"});
+      // Load body segmentation model
       bodySegmentation = ml5.bodySegmentation("SelfieSegmentation", {
         maskType: "person",
       });
+      // Load image classifier to detect flashlight (could be MobileNet or a custom model)
+      classifier = ml5.imageClassifier('MobileNet', video, () => {
+        console.log('Classifier ready');
+      });
       await bodySegmentation.ready;
-      console.log('model ready');
+      console.log('Model ready');
       setup();
     }
 
@@ -64,10 +74,12 @@
       maskCanvas = document.createElement('canvas');
       maskCtx = maskCanvas.getContext('2d');
       // create a video stream - specify a fixed size
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {
-        width: 640,
-        height: 480
-      } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 640,
+          height: 480
+        }
+      });
       video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -76,26 +88,44 @@
       $canvas.height = video.height = maskCanvas.height = 480;
       // start detecting
       bodySegmentation.detectStart(video, (result) => {
-        // store the result in a global variable
         segmentation = result;
       });
-      // start the app
+      // Start image classification to detect the flashlight
+      classifyFrame();
       setState(STATE_RUNNING);
+    }
+
+    // Detect flashlight in the current frame
+    const classifyFrame = () => {
+      classifier.classify(video, (err, results) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        // Check if the flashlight is detected
+        const detection = results[0].label.toLowerCase();
+        flashlightDetected = detection.includes('flashlight') || detection.includes('phone'); // Adjust based on model output
+        setTimeout(classifyFrame, 200); // Classify again after 200ms
+      });
     }
 
     const draw = () => {
       if (state === STATE_RUNNING) {
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-        if (segmentation) {
+        if (segmentation && flashlightDetected) {
           // draw the mask to a separate, invisible canvas
           maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
           maskCtx.putImageData(segmentation.mask, 0, 0);
-          // draw the video, masked
+          // draw the video, but only show masked area if flashlight is detected
           ctx.save();
           ctx.drawImage(video, 0, 0);
           ctx.globalCompositeOperation = 'xor';
           ctx.drawImage(maskCanvas, 0, 0);
           ctx.restore();
+        } else {
+          // If flashlight isn't detected, draw the masked canvas (dark scene)
+          ctx.fillStyle = 'black';
+          ctx.fillRect(0, 0, $canvas.width, $canvas.height);
         }
       }
       requestAnimationFrame(draw);
@@ -104,4 +134,5 @@
     preload();
   </script>
 </body>
+
 </html>

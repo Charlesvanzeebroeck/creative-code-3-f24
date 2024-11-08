@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test</title>
+  <title>BodyPose</title>
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -58,6 +58,8 @@
     }
 
     const setup = async () => {
+      background(255);
+
       console.log('setup');
       ctx = $canvas.getContext('2d');
       // create a video stream - specify a fixed size
@@ -98,7 +100,6 @@
       }
       requestAnimationFrame(draw);
     }
-
     preload();
   </script>
 </body>
